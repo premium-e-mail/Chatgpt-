@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>***** Alias Generator Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #64748b;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --gradient-start: #4361ee;
+            --gradient-end: #3a0ca3;
+        }
+
+        .dark-mode {
+            --primary: #5e72e4;
+            --primary-dark: #4c60d2;
+            --secondary: #94a3b8;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --border: #334155;
+            --shadow: rgba(0, 0, 0, 0.2);
+            --gradient-start: #5e72e4;
+            --gradient-end: #4c60d2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.5;
+            transition: background-color 0.3s;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: container-appear 0.5s ease-out forwards;
+        }
+
+        @keyframes container-appear {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
+            transform: rotate(30deg);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        label i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: var(--card-bg);
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .advanced-options {
+            background-color: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border: 1px solid var(--border);
+        }
+
+        .advanced-header {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+            user-select: none;
+        }
+
+        .advanced-header h3 {
+            margin-left: 12px;
+            color: var(--primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .advanced-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        button i {
+            margin-right: 10px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            background-color: var(--success);
+        }
+
+        .btn-download:hover {
+            background-color: #0da271;
+        }
+
+        .btn-clear {
+            background-color: var(--error);
+        }
+
+        .btn-clear:hover {
+            background-color: #dc2626;
+        }
+
+        .result {
+            margin-top: 30px;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background-color: var(--card-bg);
+        }
+
+        .email-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .email-item:hover {
+            background-color: rgba(67, 97, 238, 0.08);
+            transform: translateX(5px);
+        }
+
+        .email-item:last-child {
+            border-bottom: none;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .preview-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .counter {
+            font-size: 1rem;
+            color: var(--primary);
+            font-weight: 600;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            background: var(--success);
+            color: white;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transform: translateX(100%);
+            transition: transform 0.4s ease-out;
+            z-index: 1000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification i {
+            margin-right: 10px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: var(--error);
+        }
+
+        .notification.warning {
+            background: var(--warning);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(15deg);
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 75px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .powered-by {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1rem;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+
+            .options,
+            .advanced-content {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .container {
+                width: 100%;
+            }
+
+            .theme-toggle,
+            .logout-btn {
+                top: 10px;
+                right: 10px;
+            }
+
+            .logout-btn {
+                top: 65px;
+            }
+        }
+
+        #login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s;
+        }
+
+        .login-form {
+            background-color: var(--card-bg);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: login-appear 0.5s ease-out 0.3s forwards;
+        }
+
+        @keyframes login-appear {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .login-form h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .login-form p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 14px 18px;
+            margin: 12px 0;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: var(--card-bg);
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .login-form input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+
+        .login-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 14px;
+        }
+
+        .login-error {
+            color: var(--error);
+            margin-top: 15px;
+            display: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .login-logo {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .pattern-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .pattern-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pattern-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body><!-- Login Form -->
+    <div id="login-container">
+        <div class="login-form">
+            <div class="login-logo"><br></div>
+            <h2>***** Alias Generator</h2>
+            <p>***** your credentials ** ****** the generator</p><input type="text" id="username" placeholder="Username">&nbsp;<input type="password" id="password" placeholder="Password"> <button class="login-btn" id="login-btn">Login</button>
+            <div class="login-error" id="login-error">Invalid username or password!</div>
+        </div>
+    </div>
+    <div class="theme-toggle" id="theme-toggle"><br></div>
+    <div class="logout-btn" id="logout-btn"><br></div>
+    <div class="container">
+        <header>
+            <h1>Email Alias Generator Pro</h1>
+            <p class="subtitle">****** multiple email ******* from your base email address **** advanced customization options</p>
+        </header>
+        <div class="main-content">
+            <div class="input-group"><label for="base-email">&nbsp;Base Email Address</label> <input type="email" id="base-email" placeholder="e.g., yourname@example.com"></div>
+            <div class="options">
+                <div class="input-group"><label for="alias-count">&nbsp;Number ** Aliases</label> <input type="number" id="alias-count" min="1" max="10000" value="100"></div>
+                <div class="input-group"><label for="format">&nbsp;Export Format</label> <select id="format">&nbsp;<option value="xlsx">Excel (.xlsx)</option>
+                        <option value="txt">Text File (.txt)</option>
+                        <option value="csv">CSV (.csv)</option>&nbsp;
+                    </select></div>
+            </div>
+            <div class="advanced-options">
+                <div class="advanced-header">
+                    <h3>Advanced Options</h3>
+                </div>
+                <div id="advanced-content" class="advanced-content">
+                    <div class="input-group"><label for="start-number">&nbsp;Starting Number</label> <input type="number" id="start-number" min="0" value="1"></div>
+                    <div class="input-group"><label for="prefix">&nbsp;Custom Prefix</label> <input type="text" id="prefix" placeholder="e.g., # or -" value="+"></div>
+                    <div class="input-group"><label>&nbsp;Pattern Type</label>
+                        <div class="pattern-selector"><button class="pattern-btn active" data-prefix="+" data-format="prefixnumber">+number</button> <button class="pattern-btn" data-prefix="." data-format="dotnumber">.number</button> <button class="pattern-btn" data-prefix="-" data-format="dashnumber">-number</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress" id="progress"><br></div>
+            </div>
+            <div class="actions"><button id="generate-btn">&nbsp; Generate Aliases&nbsp;</button> <button id="download-btn" class="btn-download" disabled="">&nbsp; Download&nbsp;</button> <button id="clear-btn" class="btn-clear">&nbsp; ***** All&nbsp;</button></div>
+            <div class="result">
+                <div class="preview-title">
+                    <h3>Preview</h3><span id="preview-counter" class="counter">0 aliases</span>
+                </div>
+                <div id="email-list"><br></div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <div class="powered-by"> Powered by NAYON</div>
+            </div>
+        </div>
+        <footer>
+            <p>Copyright &copy; 2023 | Email ***** Generator Pro | Created with by NAYON</p>
+        </footer>
+    </div>
+    <div class="notification" id="notification"> Copied ** clipboard!</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        
+            // DOM Elements
+        
+            const themeToggle = document.getElementById('theme-toggle');
+        
+            const logoutBtn = document.getElementById('logout-btn');
+        
+            const loginContainer = document.getElementById('login-container');
+        
+            const usernameInput = document.getElementById('username');
+        
+            const passwordInput = document.getElementById('password');
+        
+            const loginBtn = document.getElementById('login-btn');
+        
+            const loginError = document.getElementById('login-error');
+        
+            const baseEmailInput = document.getElementById('base-email');
+        
+            const aliasCountInput = document.getElementById('alias-count');
+        
+            const formatSelect = document.getElementById('format');
+        
+            const generateBtn = document.getElementById('generate-btn');
+        
+            const downloadBtn = document.getElementById('download-btn');
+        
+            const clearBtn = document.getElementById('clear-btn');
+        
+            const emailList = document.getElementById('email-list');
+        
+            const previewCounter = document.getElementById('preview-counter');
+        
+            const startNumberInput = document.getElementById('start-number');
+        
+            const prefixInput = document.getElementById('prefix');
+        
+            const notification = document.getElementById('notification');
+        
+            const progressBar = document.getElementById('progress-bar');
+        
+            const progress = document.getElementById('progress');
+        
+            const patternButtons = document.querySelectorAll('.pattern-btn');
+        
+            
+        
+            // State variables
+        
+            let generatedEmails = [];
+        
+            let advancedVisible = false;
+        
+            let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+            
+        
+            // Initialize theme
+        
+            if (isDarkMode) {
+        
+                document.body.classList.add('dark-mode');
+        
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        
+            }
+        
+            
+        
+            // Check if user is logged in
+        
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+        
+                loginContainer.style.display = 'none';
+        
+            } else {
+        
+                document.body.style.overflow = 'hidden';
+        
+            }
+        
+            
+        
+            // Event Listeners
+        
+            themeToggle.addEventListener('click', toggleTheme);
+        
+            logoutBtn.addEventListener('click', logout);
+        
+            loginBtn.addEventListener('click', login);
+        
+            generateBtn.addEventListener('click', generateEmails);
+        
+            downloadBtn.addEventListener('click', downloadFile);
+        
+            clearBtn.addEventListener('click', clearAll);
+        
+            
+        
+            // Pattern buttons
+        
+            patternButtons.forEach(btn => {
+        
+                btn.addEventListener('click', function() {
+        
+                    patternButtons.forEach(b => b.classList.remove('active'));
+        
+                    this.classList.add('active');
+        
+                    prefixInput.value = this.dataset.prefix;
+        
+                });
+        
+            });
+        
+            
+        
+            // Allow login on Enter key
+        
+            passwordInput.addEventListener('keypress', function(e) {
+        
+                if (e.key === 'Enter') {
+        
+                    login();
+        
+                }
+        
+            });
+        
+            
+        
+            // Functions
+        
+            function toggleTheme() {
+        
+                isDarkMode = !isDarkMode;
+        
+                document.body.classList.toggle('dark-mode');
+        
+                localStorage.setItem('darkMode', isDarkMode);
+        
+                
+        
+                if (isDarkMode) {
+        
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        
+                } else {
+        
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        
+                }
+        
+            }
+        
+            
+        
+            function login() {
+        
+                if (usernameInput.value === 'Nayon' && passwordInput.value === 'Nayon1122') {
+        
+                    localStorage.setItem('isLoggedIn', 'true');
+        
+                    loginContainer.style.opacity = 0;
+        
+                    setTimeout(() => {
+        
+                        loginContainer.style.display = 'none';
+        
+                        document.body.style.overflow = 'auto';
+        
+                    }, 500);
+        
+                } else {
+        
+                    loginError.style.display = 'block';
+        
+                    usernameInput.style.borderColor = 'var(--error)';
+        
+                    passwordInput.style.borderColor = 'var(--error)';
+        
+                    setTimeout(() => {
+        
+                        loginError.style.display = 'none';
+        
+                        usernameInput.style.borderColor = '';
+        
+                        passwordInput.style.borderColor = '';
+        
+                    }, 3000);
+        
+                }
+        
+            }
+        
+            
+        
+            function logout() {
+        
+                localStorage.removeItem('isLoggedIn');
+        
+                loginContainer.style.display = 'flex';
+        
+                document.body.style.overflow = 'hidden';
+        
+                setTimeout(() => {
+        
+                    loginContainer.style.opacity = 1;
+        
+                }, 10);
+        
+                usernameInput.value = '';
+        
+                passwordInput.value = '';
+        
+            }
+        
+            
+        
+            function generateEmails() {
+        
+                const baseEmail = baseEmailInput.value.trim();
+        
+                const aliasCount = parseInt(aliasCountInput.value);
+        
+                const startNumber = parseInt(startNumberInput.value);
+        
+                const prefix = prefixInput.value.trim();
+        
+                
+        
+                if (!isValidEmail(baseEmail)) {
+        
+                    showNotification('Please enter a valid email address', 'error');
+        
+                    baseEmailInput.focus();
+        
+                    return;
+        
+                }
+        
+                
+        
+                if (isNaN(aliasCount) || aliasCount < 1 || aliasCount > 10000) {
+        
+                    showNotification('Please enter a number between 1 and 10000', 'error');
+        
+                    aliasCountInput.focus();
+        
+                    return;
+        
+                }
+        
+                
+        
+                if (isNaN(startNumber) || startNumber < 0) {
+        
+                    showNotification('Please enter a valid starting number', 'error');
+        
+                    startNumberInput.focus();
+        
+                    return;
+        
+                }
+        
+                
+        
+                // Show progress bar
+        
+                progressBar.style.display = 'block';
+        
+                progress.style.width = '0%';
+        
+                
+        
+                // Simulate progress for better UX
+        
+                let progressValue = 0;
+        
+                const progressInterval = setInterval(() => {
+        
+                    progressValue += 5;
+        
+                    progress.style.width = `${progressValue}%`;
+        
+                    if (progressValue >= 100) clearInterval(progressInterval);
+        
+                }, 50);
+        
+                
+        
+                setTimeout(() => {
+        
+                    const [localPart, domain] = baseEmail.split('@');
+        
+                    generatedEmails = [];
+        
+                    
+        
+                    for (let i = startNumber; i < startNumber + aliasCount; i++) {
+        
+                        generatedEmails.push(`${localPart}${prefix}${i}@${domain}`);
+        
+                    }
+        
+                    
+        
+                    displayEmails();
+        
+                    downloadBtn.disabled = false;
+        
+                    progressBar.style.display = 'none';
+        
+                    showNotification(`${aliasCount} email aliases generated successfully!`);
+        
+                }, 600);
+        
+            }
+        
+            
+        
+            function displayEmails() {
+        
+                emailList.innerHTML = '';
+        
+                previewCounter.textContent = `${generatedEmails.length} aliases`;
+        
+                
+        
+                // Show only first 10 for preview
+        
+                const previewEmails = generatedEmails.slice(0, 10);
+        
+                
+        
+                previewEmails.forEach(email => {
+        
+                    const emailElement = document.createElement('div');
+        
+                    emailElement.className = 'email-item';
+        
+                    
+        
+                    const emailText = document.createElement('span');
+        
+                    emailText.textContent = email;
+        
+                    
+        
+                    const copyButton = document.createElement('button');
+        
+                    copyButton.className = 'copy-btn';
+        
+                    copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+        
+                    copyButton.addEventListener('click', () => {
+        
+                        copyToClipboard(email);
+        
+                        showNotification('Copied to clipboard!');
+        
+                    });
+        
+                    
+        
+                    emailElement.appendChild(emailText);
+        
+                    emailElement.appendChild(copyButton);
+        
+                    emailList.appendChild(emailElement);
+        
+                });
+        
+                
+        
+                if (generatedEmails.length > 10) {
+        
+                    const moreElement = document.createElement('div');
+        
+                    moreElement.className = 'email-item';
+        
+                    moreElement.style.textAlign = 'center';
+        
+                    moreElement.style.fontStyle = 'italic';
+        
+                    moreElement.textContent = `... and ${generatedEmails.length - 10} more`;
+        
+                    emailList.appendChild(moreElement);
+        
+                }
+        
+            }
+        
+            
+        
+            function downloadFile() {
+        
+                if (generatedEmails.length === 0) {
+        
+                    showNotification('Please generate aliases first', 'error');
+        
+                    return;
+        
+                }
+        
+                
+        
+                const format = formatSelect.value;
+        
+                const baseEmail = baseEmailInput.value.trim();
+        
+                const [localPart] = baseEmail.split('@');
+        
+                
+        
+                // Show progress
+        
+                progressBar.style.display = 'block';
+        
+                progress.style.width = '100%';
+        
+                
+        
+                setTimeout(() => {
+        
+                    if (format === 'xlsx') {
+        
+                        const worksheet = XLSX.utils.aoa_to_sheet([['Email Aliases'], ...generatedEmails.map(email => [email])]);
+        
+                        const workbook = XLSX.utils.book_new();
+        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Email Aliases');
+        
+                        XLSX.writeFile(workbook, `${localPart}_aliases.xlsx`);
+        
+                    } else if (format === 'txt' || format === 'csv') {
+        
+                        const extension = format === 'txt' ? 'txt' : 'csv';
+        
+                        const content = generatedEmails.join('\n');
+        
+                        const blob = new Blob([content], { type: 'text/plain' });
+        
+                        const url = URL.createObjectURL(blob);
+        
+                        const a = document.createElement('a');
+        
+                        a.href = url;
+        
+                        a.download = `${localPart}_aliases.${extension}`;
+        
+                        document.body.appendChild(a);
+        
+                        a.click();
+        
+                        document.body.removeChild(a);
+        
+                        URL.revokeObjectURL(url);
+        
+                    }
+        
+                    
+        
+                    progressBar.style.display = 'none';
+        
+                    showNotification(`${generatedEmails.length} aliases downloaded as ${format.toUpperCase()}`);
+        
+                }, 500);
+        
+            }
+        
+            
+        
+            function clearAll() {
+        
+                generatedEmails = [];
+        
+                emailList.innerHTML = '';
+        
+                previewCounter.textContent = '0 aliases';
+        
+                downloadBtn.disabled = true;
+        
+                baseEmailInput.value = '';
+        
+                aliasCountInput.value = '100';
+        
+                startNumberInput.value = '1';
+        
+                prefixInput.value = '+';
+        
+                
+        
+                // Reset pattern buttons
+        
+                patternButtons.forEach(btn => btn.classList.remove('active'));
+        
+                patternButtons[0].classList.add('active');
+        
+                
+        
+                showNotification('All data cleared', 'warning');
+        
+            }
+        
+            
+        
+            function copyToClipboard(text) {
+        
+                const textarea = document.createElement('textarea');
+        
+                textarea.value = text;
+        
+                document.body.appendChild(textarea);
+        
+                textarea.select();
+        
+                document.execCommand('copy');
+        
+                document.body.removeChild(textarea);
+        
+            }
+        
+            
+        
+            function showNotification(message, type = 'success') {
+        
+                const icon = type === 'success' ? 'fa-check-circle' : 
+        
+                            type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        
+                
+        
+                notification.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+        
+                notification.className = type === 'success' ? 'notification show' : `notification show ${type}`;
+        
+                
+        
+                setTimeout(() => {
+        
+                    notification.className = 'notification';
+        
+                }, 3000);
+        
+            }
+        
+            
+        
+            function isValidEmail(email) {
+        
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+                return re.test(email);
+        
+            }
+        
+            
+        
+            function toggleAdvanced() {
+        
+                const advancedContent = document.getElementById('advanced-content');
+        
+                const advancedArrow = document.getElementById('advanced-arrow');
+        
+                
+        
+                if (advancedVisible) {
+        
+                    advancedContent.style.display = 'none';
+        
+                    advancedArrow.className = 'fas fa-chevron-down';
+        
+                } else {
+        
+                    advancedContent.style.display = 'grid';
+        
+                    advancedArrow.className = 'fas fa-chevron-up';
+        
+                }
+        
+                
+        
+                advancedVisible = !advancedVisible;
+        
+            }
+        
+            
+        
+            // Initialize advanced options as hidden
+        
+            document.getElementById('advanced-content').style.display = 'none';
+        
+        });
+        
+    </script>
+
+<div style="color: red">Word to HTML trial - please <a href="https://wordtohtml.net/site/payment">Go PRO</a> to get whole HTML.</div>
+</body>
+
+</html>
